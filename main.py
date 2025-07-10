@@ -23,7 +23,7 @@ def aggregate_data(data):
         'Logged In Time': 'sum'
     })
     summary['Productive Time'] = summary['Handling Time'] + summary['Wrap Up Time'] + summary['Busy Time']
-    summary['Productivity %'] = (summary['Productive Time'] / summary['Logged In Time']).round(2) * 100
+    summary['Productivity %'] = round((summary['Productive Time'] / summary['Logged In Time']).round(2) * 100, 2)
     return summary.reset_index()
 
 def main():
@@ -44,8 +44,8 @@ def main():
 
     # Logged-in vs Productive Time Stacked Bar Chart
     st.header('Logged-in vs Productive Time')
-    summary['Logged In Hours'] = summary['Logged In Time'].dt.total_seconds() / 3600
-    summary['Productive Hours'] = summary['Productive Time'].dt.total_seconds() / 3600
+    summary['Logged In Hours'] = round(summary['Logged In Time'].dt.total_seconds() / 3600, 2)
+    summary['Productive Hours'] = round(summary['Productive Time'].dt.total_seconds() / 3600, 2)
     stacked_df = summary.melt(id_vars=['Agent'], value_vars=['Logged In Hours', 'Productive Hours'],
                             var_name='Type', value_name='Hours')
     stacked_chart = px.bar(stacked_df, x='Hours', y='Agent', color='Type', orientation='h', height=500)
@@ -53,8 +53,8 @@ def main():
 
     # Break & Offline Time Scatter Plot
     st.header('Break & Offline Time Analysis')
-    summary['Break Hours'] = summary['On Break Time'].dt.total_seconds() / 3600
-    summary['Offline Hours'] = summary['Working Offline Time'].dt.total_seconds() / 3600
+    summary['Break Hours'] = round(summary['On Break Time'].dt.total_seconds() / 3600, 2)
+    summary['Offline Hours'] = round(summary['Working Offline Time'].dt.total_seconds() / 3600, 2)
     scatter_chart = px.scatter(summary, x='Break Hours', y='Offline Hours', size='Logged In Hours',
                             color='Agent', labels={'Break Hours':'Break Time (hrs)', 'Offline Hours':'Offline Time (hrs)'},
                             height=500)
@@ -64,7 +64,7 @@ def main():
     st.header('Daily Activity Patterns')
     data['Date'] = data['Start Time'].dt.date
     daily_data = data.groupby(['Date', 'Agent']).agg({'Logged In Time':'sum'}).reset_index()
-    daily_data['Logged In Hours'] = daily_data['Logged In Time'].dt.total_seconds() / 3600
+    daily_data['Logged In Hours'] = round(daily_data['Logged In Time'].dt.total_seconds() / 3600)
     heatmap_data = daily_data.pivot(index='Agent', columns='Date', values='Logged In Hours').fillna(0)
     heatmap_chart = px.imshow(heatmap_data, labels=dict(x="Date", y="Agent", color="Hours"), height=600)
     st.plotly_chart(heatmap_chart)
